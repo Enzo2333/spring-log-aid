@@ -121,6 +121,8 @@ public class RestTemplateInterceptor implements ClientHttpRequestInterceptor {
         String requestBody;
         sb.append("LogRequestId:").append(MDC.get(AidConstants.MDC_REQUEST_ID_KEY)).append(System.lineSeparator());
         sb.append("===========OUTBOUND REQUEST START============").append(System.lineSeparator());
+        sb.append("Request time: ").append(LocalDateTime.now()).append(System.lineSeparator());
+        sb.append("Curl: ").append(System.lineSeparator());
         requestBody = Optional.ofNullable(body).map((bodyBytes) -> new String(bodyBytes, StandardCharsets.UTF_8)).orElse(null);
         if (!this.isPrintRequestBody && StringUtils.hasText(requestBody)) {
             requestBody = "Print requestBody flag of log aid is disabled!";

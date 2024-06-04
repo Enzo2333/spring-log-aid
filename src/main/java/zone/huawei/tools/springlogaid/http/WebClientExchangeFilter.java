@@ -110,6 +110,8 @@ public class WebClientExchangeFilter implements ExchangeFilterFunction {
             StringBuilder sb = new StringBuilder();
             String requestBody;
             sb.append("===========OUTBOUND REQUEST START============").append(System.lineSeparator());
+            sb.append("Request time: ").append(LocalDateTime.now()).append(System.lineSeparator());
+            sb.append("Curl: ").append(System.lineSeparator());
             requestBody = Optional.ofNullable(dataBuffer).map((bodyBytes) -> dataBuffer.toString(StandardCharsets.UTF_8)).orElse(null);
             if (!this.isPrintRequestBody && StringUtils.hasText(requestBody)) {
                 requestBody = "Print requestBody flag is disabled!";
