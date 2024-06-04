@@ -68,6 +68,7 @@ public class WebClientExchangeFilter implements ExchangeFilterFunction {
         }
         StopWatch stopWatch = new StopWatch();
         StringBuilder requestInfoHolder = new StringBuilder();
+        requestInfoHolder.append("LogRequestId:").append(MDC.get(AidConstants.MDC_REQUEST_ID_KEY)).append(System.lineSeparator());
         ClientRequest clientRequest = ClientRequest.from(request)
                 .headers(httpHeaders -> {
                     httpHeaders.add(AidConstants.INBOUND_REQUEST_ID_HEADER_KEY, UUID.randomUUID().toString());
@@ -108,7 +109,6 @@ public class WebClientExchangeFilter implements ExchangeFilterFunction {
         try {
             StringBuilder sb = new StringBuilder();
             String requestBody;
-            sb.append("LogRequestId:").append(MDC.get(AidConstants.MDC_REQUEST_ID_KEY)).append(System.lineSeparator());
             sb.append("===========OUTBOUND REQUEST START============").append(System.lineSeparator());
             requestBody = Optional.ofNullable(dataBuffer).map((bodyBytes) -> dataBuffer.toString(StandardCharsets.UTF_8)).orElse(null);
             if (!this.isPrintRequestBody && StringUtils.hasText(requestBody)) {
