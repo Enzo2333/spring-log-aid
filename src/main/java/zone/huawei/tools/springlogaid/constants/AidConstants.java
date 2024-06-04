@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-@Component
+@Component("zone.huawei.tools.springlogaid.constants.AidConstants")
 public class AidConstants {
 
     public static final Object DEFAULT_VALUE = new Object();

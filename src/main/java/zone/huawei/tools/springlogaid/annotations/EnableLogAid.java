@@ -2,7 +2,7 @@ package zone.huawei.tools.springlogaid.annotations;
 
 
 import org.springframework.context.annotation.Import;
-import zone.huawei.tools.springlogaid.annotations.selectors.AidBaseImportSelector;
+import zone.huawei.tools.springlogaid.annotations.selectors.AidBaseBeanRegistrar;
 import zone.huawei.tools.springlogaid.annotations.selectors.AidImportSelector;
 import zone.huawei.tools.springlogaid.enums.OperatingMode;
 
@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Import({AidBaseImportSelector.class,AidImportSelector.class})
+@Import({AidBaseBeanRegistrar.class,AidImportSelector.class})
 public @interface EnableLogAid {
 
     OperatingMode scope() default OperatingMode.DEFAULT;
