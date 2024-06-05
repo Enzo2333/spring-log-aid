@@ -6,12 +6,12 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.util.UriComponentsBuilder;
 import zone.huawei.tools.springlogaid.annotations.ExclusionRequest;
 import zone.huawei.tools.springlogaid.annotations.TrackingRequest;
 import zone.huawei.tools.springlogaid.constants.AidConstants;
 
 import java.lang.reflect.Method;
+import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -77,7 +77,11 @@ public class TrackingRequestProcessor implements BeanPostProcessor {
     }
 
     private String buildUri(String cUri, String value) {
-        return UriComponentsBuilder.fromPath(cUri).pathSegment(value).toUriString();
+        String uriString = Paths.get(cUri, value).toString().replaceAll("\\\\", "/");
+        if (!uriString.startsWith("/")){
+            uriString = "/".concat(uriString);
+        }
+        return uriString;
     }
 
     @Override
