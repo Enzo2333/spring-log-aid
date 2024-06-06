@@ -1,4 +1,4 @@
-package zone.huawei.tools.springlogaid.annotations.selectors;
+package zone.huawei.tools.springlogaid.annotations.registrars;
 
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -12,7 +12,7 @@ import zone.huawei.tools.springlogaid.constants.AidConstants;
 import zone.huawei.tools.springlogaid.exception.AidExceptionResolver;
 import zone.huawei.tools.springlogaid.exception.ResponseBodyLoggingAdvice;
 import zone.huawei.tools.springlogaid.filters.LogAidFilter;
-import zone.huawei.tools.springlogaid.processors.TrackingRequestProcessor;
+import zone.huawei.tools.springlogaid.processors.RequestMappingInfoCollector;
 
 import java.util.List;
 
@@ -27,7 +27,7 @@ public class AidBaseBeanRegistrar implements ImportBeanDefinitionRegistrar {
             ResponseBodyLoggingAdvice.class,
             LogAidFilter.class,
             AidExceptionResolver.class,
-            TrackingRequestProcessor.class);
+            RequestMappingInfoCollector.class);
 
 
     @Override

@@ -5,21 +5,22 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import zone.huawei.tools.springlogaid.config.LogAidConfigProps;
 import zone.huawei.tools.springlogaid.enums.OperatingMode;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.regex.Pattern;
 
-@Component("zone.huawei.tools.springlogaid.constants.AidConstants")
 public class AidConstants {
 
     public static final Object DEFAULT_VALUE = new Object();
 
-    public static final Set<String> ACTIVE_URIS = new CopyOnWriteArraySet<>();
+    public static final Set<RequestMappingInfo> ACTIVATED_REQUEST_MAPPING = new CopyOnWriteArraySet<>();
 
-    public static final Set<String> FILTER_EXCLUDE_URIS = new HashSet<>();
+    public static final Set<Pattern> FILTER_EXCLUDE_URI_PATTERNS = new HashSet<>();
 
     public static final String INBOUND_REQUEST_ID_HEADER_KEY = "log-trace-requestId";
 
@@ -64,7 +65,9 @@ public class AidConstants {
     public AidConstants(LogAidConfigProps configProps) {
         CONFIG_ENABLED = true;
         if (configProps.getPrintInboundRequestExclusionUris() != null) {
-            FILTER_EXCLUDE_URIS.addAll(configProps.getPrintInboundRequestExclusionUris());
+            for (String exclusionUri : configProps.getPrintInboundRequestExclusionUris()) {
+                FILTER_EXCLUDE_URI_PATTERNS.add(Pattern.compile(exclusionUri));
+            }
         }
         if (LOG_LEVER == null){
             LOG_LEVER = configProps.getLogLevel();

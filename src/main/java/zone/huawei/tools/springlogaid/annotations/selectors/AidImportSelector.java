@@ -5,6 +5,7 @@ import zone.huawei.tools.springlogaid.annotations.EnableLogAid;
 import zone.huawei.tools.springlogaid.constants.AidConstants;
 import zone.huawei.tools.springlogaid.enums.OperatingMode;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static zone.huawei.tools.springlogaid.constants.AidConstants.*;
 import static zone.huawei.tools.springlogaid.constants.AidConstants.OutboundRequest.PASSING_HEADERS;
@@ -26,8 +27,9 @@ public class AidImportSelector extends ConfigImportSelector<EnableLogAid> {
         String[] passingHeaders = attributes.getStringArray("passingHeaders");
         if (mode != OperatingMode.DEFAULT)
             AidConstants.MODE = mode;
-        if (filterExcludeUris.length>0)
-            FILTER_EXCLUDE_URIS.addAll(List.of(filterExcludeUris));
+        for (String excludeUri : filterExcludeUris) {
+            FILTER_EXCLUDE_URI_PATTERNS.add(Pattern.compile(excludeUri));
+        }
         if (!mdcRequestIdKey.isBlank())
             MDC_REQUEST_ID_KEY = mdcRequestIdKey;
         if (logLevel!= AidConstants.LogLevel.DEFAULT)

@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 import zone.huawei.tools.springlogaid.context.LTH;
@@ -14,7 +13,6 @@ import java.util.List;
 import java.util.concurrent.CompletionException;
 
 @Slf4j
-@Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class AidExceptionResolver implements HandlerExceptionResolver {
 

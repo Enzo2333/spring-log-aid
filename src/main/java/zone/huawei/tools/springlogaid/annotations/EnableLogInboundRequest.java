@@ -1,7 +1,7 @@
 package zone.huawei.tools.springlogaid.annotations;
 
 import org.springframework.context.annotation.Import;
-import zone.huawei.tools.springlogaid.annotations.selectors.AidBaseBeanRegistrar;
+import zone.huawei.tools.springlogaid.annotations.registrars.AidBaseBeanRegistrar;
 import zone.huawei.tools.springlogaid.annotations.selectors.AidInboundRequestImportSelector;
 import zone.huawei.tools.springlogaid.enums.AidBoolean;
 

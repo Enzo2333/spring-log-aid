@@ -8,9 +8,10 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
+import org.springframework.web.util.ServletRequestPathUtils;
 import zone.huawei.tools.springlogaid.constants.AidConstants;
 import zone.huawei.tools.springlogaid.context.LTH;
 import zone.huawei.tools.springlogaid.model.requests.CachedHttpServletRequest;
@@ -20,10 +21,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
-import static zone.huawei.tools.springlogaid.constants.AidConstants.ENABLE_FILTER_GLOBAL;
+import static zone.huawei.tools.springlogaid.constants.AidConstants.*;
 
-@Component
 @Order(value = Integer.MIN_VALUE)
 public class LogAidFilter implements Filter {
 
@@ -41,10 +42,9 @@ public class LogAidFilter implements Filter {
                 MDC.put(AidConstants.INBOUND_REQUEST_ID_HEADER_KEY, traceHeader);
                 LTH.addLogKey(AidConstants.INBOUND_REQUEST_ID_HEADER_KEY, traceHeader);
             }
-            String requestURI = httpServletRequest.getRequestURI();
-            boolean printRequest = !AidConstants.FILTER_EXCLUDE_URIS.contains(requestURI);
+            boolean printRequest = !isExcludeRequest(httpServletRequest);
             boolean enabled = printRequest && ENABLE_FILTER_GLOBAL;
-            if (AidConstants.isGlobalMode() || AidConstants.ACTIVE_URIS.contains(requestURI)) {
+            if (AidConstants.isGlobalMode() || isActivatedRequest(httpServletRequest)) {
                 LTH.clear();
                 LTH.enable();
                 if (printRequest)
@@ -69,6 +69,26 @@ public class LogAidFilter implements Filter {
         } else {
             filterChain.doFilter(servletRequest, servletResponse);
         }
+    }
+
+    private boolean isExcludeRequest(HttpServletRequest request){
+        String requestURI = request.getRequestURI();
+        for (Pattern uriPattern : FILTER_EXCLUDE_URI_PATTERNS) {
+            if (uriPattern.matcher(requestURI).matches()){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isActivatedRequest(HttpServletRequest request){
+        ServletRequestPathUtils.parseAndCache(request);
+        for (RequestMappingInfo requestMappingInfo : ACTIVATED_REQUEST_MAPPING) {
+            if (requestMappingInfo.getMatchingCondition(request)!=null){
+                return true;
+            }
+        }
+        return false;
     }
 
     private void traceRequest(HttpServletRequest request) throws IOException {

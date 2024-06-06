@@ -1,7 +1,7 @@
 package zone.huawei.tools.springlogaid.annotations;
 
 import org.springframework.context.annotation.Import;
-import zone.huawei.tools.springlogaid.annotations.selectors.ReadAidConfigBeanRegistrar;
+import zone.huawei.tools.springlogaid.annotations.registrars.ReadAidConfigBeanRegistrar;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
