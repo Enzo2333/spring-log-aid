@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Import({AidBaseBeanRegistrar.class,AidImportSelector.class})
+@Import({AidBaseBeanRegistrar.class, AidImportSelector.class})
 public @interface EnableLogAid {
 
     OperatingMode scope() default OperatingMode.DEFAULT;

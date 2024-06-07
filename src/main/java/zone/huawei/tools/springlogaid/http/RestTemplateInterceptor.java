@@ -25,6 +25,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Consumer;
 
+import static zone.huawei.tools.springlogaid.constants.AidConstants.ENABLE_TRACKING_REQUEST;
+
 /**
  * Please use BufferingClientHttpRequestFactory when instantiating RestTemplate,
  * otherwise this interceptor will make your request body and response body disappear.
@@ -95,7 +97,7 @@ public class RestTemplateInterceptor implements ClientHttpRequestInterceptor {
 
     private boolean isEnabled() {
         if (this.requestMode) {
-            return LTH.isEnabled();
+            return LTH.isOutboundRequestEnabled();
         } else {
             return true;
         }
@@ -207,6 +209,9 @@ public class RestTemplateInterceptor implements ClientHttpRequestInterceptor {
         }
 
         public Builder usePrivateMode() {
+            if (!ENABLE_TRACKING_REQUEST) {
+                throw new UnsupportedOperationException("LOG AID :: You can not use Private Mode in RestTemplateInterceptor.class, Because Request Mode is not enable, Please consider set the scope = OperatingMode.Request in @EnableOutboundRequestConfig or @EnableLogAid annotation in your Configuration class to enable it!");
+            }
             this.requestMode = true;
             return this;
         }
@@ -242,7 +247,7 @@ public class RestTemplateInterceptor implements ClientHttpRequestInterceptor {
                 this.isPrintRequestBody = AidConstants.OutboundRequest.PRINT_REQUEST_BODY;
                 this.isPrintResponseBody = AidConstants.OutboundRequest.PRINT_RESPONSE_BODY;
             } else {
-                throw new UnsupportedOperationException("LOG AID :: You can not use Properties Config in RestTemplateInterceptor.class, Because Log Aid Config is not enable, Please consider adding the @EnableAidConfig annotation in your Configuration class to enable it!");
+                throw new UnsupportedOperationException("LOG AID :: You can not use Properties Config in RestTemplateInterceptor.class, Because Outbound Request Config is not enable, Please consider add the @EnableOutboundRequestConfig annotation in your Configuration class to enable it!");
             }
             return this;
         }

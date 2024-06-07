@@ -11,7 +11,7 @@ import zone.huawei.tools.springlogaid.enums.OperatingMode;
 import java.util.Set;
 
 @Data
-@Component
+@Component("zone.huawei.tools.springlogaid.config.LogAidConfigProps")
 @ConfigurationProperties("log.aid")
 public class LogAidConfigProps {
 
@@ -35,15 +35,20 @@ public class LogAidConfigProps {
 
     @Data
     public static class OutboundRequest {
+
+        private OperatingMode mode;
+
         private Set<String> passingHeaders;
 
         private Boolean printRequestBody;
 
-        private Boolean printResponseBody = true;
+        private Boolean printResponseBody;
     }
 
     @Data
     public static class InboundRequest {
+
+        private OperatingMode mode;
 
         private Boolean printRequestBody;
 
@@ -51,7 +56,7 @@ public class LogAidConfigProps {
     }
 
     @Autowired
-    public LogAidConfigProps(ApplicationContext context){
+    public LogAidConfigProps(ApplicationContext context) {
         this.context = context;
     }
 }

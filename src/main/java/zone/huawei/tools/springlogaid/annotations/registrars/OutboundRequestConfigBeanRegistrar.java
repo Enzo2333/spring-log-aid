@@ -8,24 +8,27 @@ import zone.huawei.tools.springlogaid.config.BeanDependencyConfigurer;
 import zone.huawei.tools.springlogaid.config.LogAidConfigProps;
 import zone.huawei.tools.springlogaid.constants.AidConstants;
 import zone.huawei.tools.springlogaid.exception.AidExceptionResolver;
-import zone.huawei.tools.springlogaid.processors.RequestMappingInfoCollector;
 
 import java.util.List;
 
 
-public class ReadAidConfigBeanRegistrar implements ImportBeanDefinitionRegistrar {
+public class OutboundRequestConfigBeanRegistrar implements ImportBeanDefinitionRegistrar {
 
     private final List<Class<?>> beanClasses = List.of(
             LogAidConfigProps.class,
             AidConstants.class,
             BeanDependencyConfigurer.class,
-            AidExceptionResolver.class,
-            RequestMappingInfoCollector.class);
+            AidExceptionResolver.class);
 
 
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
-        beanClasses.forEach(aClass -> registry.registerBeanDefinition(aClass.getName(), BeanDefinitionBuilder.genericBeanDefinition(aClass).getBeanDefinition()));
+        beanClasses.forEach(aClass -> {
+            if (registry.containsBeanDefinition(aClass.getName())) {
+                return;
+            }
+            registry.registerBeanDefinition(aClass.getName(), BeanDefinitionBuilder.genericBeanDefinition(aClass).getBeanDefinition());
+        });
     }
 
 }

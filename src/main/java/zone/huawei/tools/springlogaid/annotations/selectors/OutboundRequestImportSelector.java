@@ -6,14 +6,17 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.core.annotation.AnnotationAttributes;
-import zone.huawei.tools.springlogaid.annotations.EnableLogInboundRequest;
+import zone.huawei.tools.springlogaid.annotations.EnableOutboundRequestConfig;
 import zone.huawei.tools.springlogaid.enums.AidBoolean;
 import zone.huawei.tools.springlogaid.enums.OperatingMode;
 import zone.huawei.tools.springlogaid.processors.RequestMappingInfoCollector;
 
-import static zone.huawei.tools.springlogaid.constants.AidConstants.*;
+import java.util.List;
 
-public class AidInboundRequestImportSelector extends ConfigImportSelector<EnableLogInboundRequest> implements BeanDefinitionRegistryPostProcessor {
+import static zone.huawei.tools.springlogaid.constants.AidConstants.OutboundRequest.*;
+import static zone.huawei.tools.springlogaid.constants.AidConstants.ENABLE_TRACKING_REQUEST;
+
+public class OutboundRequestImportSelector extends ConfigImportSelector<EnableOutboundRequestConfig> implements BeanDefinitionRegistryPostProcessor {
 
     @Override
     protected String[] selectImports(AnnotationAttributes attributes) {
@@ -23,19 +26,19 @@ public class AidInboundRequestImportSelector extends ConfigImportSelector<Enable
 
     private void settingConstants(AnnotationAttributes attributes) {
         OperatingMode mode = attributes.getEnum("scope");
+        String[] passingHeaders = attributes.getStringArray("passingHeaders");
         AidBoolean printRequestBody = attributes.getEnum("printRequestBody");
         AidBoolean printResponseBody = attributes.getEnum("printResponseBody");
 
-        if (mode.equals(OperatingMode.Request)) {
+        if (mode == OperatingMode.Request) {
             ENABLE_TRACKING_REQUEST = true;
-            ENABLE_INBOUND_REQUEST_GLOBAL = false;
-        } else {
-            ENABLE_INBOUND_REQUEST_GLOBAL = true;
         }
         if (printResponseBody != AidBoolean.Default)
-            InboundRequest.PRINT_REQUEST_BODY = printRequestBody == AidBoolean.True;
+            PRINT_REQUEST_BODY = printRequestBody == AidBoolean.True;
         if (printResponseBody != AidBoolean.Default)
-            InboundRequest.PRINT_RESPONSE_BODY = printResponseBody == AidBoolean.True;
+            PRINT_RESPONSE_BODY = printResponseBody == AidBoolean.True;
+        if (passingHeaders.length > 0)
+            PASSING_HEADERS.addAll(List.of(passingHeaders));
     }
 
     @Override

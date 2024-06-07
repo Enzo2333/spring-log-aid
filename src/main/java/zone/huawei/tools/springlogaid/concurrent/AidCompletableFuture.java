@@ -41,15 +41,18 @@ public class AidCompletableFuture {
         }
     }
 
-    private static void setThreadInfo(ThreadInfo threadInfo){
+    private static void setThreadInfo(ThreadInfo threadInfo) {
         try {
             MDC.setContextMap(threadInfo.getMdcMessage());
             RequestContextHolder.setRequestAttributes(threadInfo.getRequestAttributes());
             String threadName = Thread.currentThread().getName();
             String requestId = threadInfo.getCurrentRequestId() + "-T-" + threadName;
             MDC.put(AidConstants.MDC_REQUEST_ID_KEY, requestId);
-            if (threadInfo.isRequestLogEnabled()){
+            if (threadInfo.isRequestLogEnabled()) {
                 LTH.enable();
+            }
+            if (threadInfo.isOutboundRequestEnabled()) {
+                LTH.enableOutboundRequest();
             }
             if (!isEnabled()) {
                 return;
@@ -57,7 +60,7 @@ public class AidCompletableFuture {
             threadInfo.getChildThreadLogIds().add(requestId);
             LTH.addLogKey("ThreadName", threadName);
         } catch (IllegalArgumentException e) {
-            log.info("LOG AID :: setThreadInfo creation failed, reason: {},StackTrace:{}",e.getMessage(), Arrays.toString(e.getStackTrace()) );
+            log.info("LOG AID :: setThreadInfo creation failed, reason: {},StackTrace:{}", e.getMessage(), Arrays.toString(e.getStackTrace()));
         }
     }
 }

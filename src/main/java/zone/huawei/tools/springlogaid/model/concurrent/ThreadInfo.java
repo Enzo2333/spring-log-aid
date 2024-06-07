@@ -21,17 +21,20 @@ public class ThreadInfo {
 
     private boolean requestLogEnabled;
 
+    private boolean outboundRequestEnabled;
+
     private List<String> childThreadErrorLogIds;
 
     private RequestAttributes requestAttributes;
 
-    private Map<String,String> mdcMessage;
+    private Map<String, String> mdcMessage;
 
     public ThreadInfo() {
         try {
             this.currentRequestId = String.valueOf(MDC.get(AidConstants.MDC_REQUEST_ID_KEY));
             this.childThreadLogIds = LTH.getChildThreadLogIds();
             this.requestLogEnabled = LTH.isEnabled();
+            this.outboundRequestEnabled = LTH.isOutboundRequestEnabled();
             this.childThreadErrorLogIds = LTH.getChildThreadErrorLogIds();
             this.requestAttributes = RequestContextHolder.getRequestAttributes();
             this.mdcMessage = MDC.getCopyOfContextMap();

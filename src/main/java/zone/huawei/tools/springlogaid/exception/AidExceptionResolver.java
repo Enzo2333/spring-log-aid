@@ -24,7 +24,7 @@ public class AidExceptionResolver implements HandlerExceptionResolver {
 
     @Override
     public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
-        if (LTH.isEnabled()){
+        if (LTH.isEnabled()) {
             LTH.initException(ex);
         }
         Exception e = ex;

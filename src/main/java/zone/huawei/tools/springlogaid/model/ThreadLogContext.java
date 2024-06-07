@@ -30,6 +30,8 @@ public class ThreadLogContext implements Serializable {
 
     private boolean inboundRequestEnabled;
 
+    private boolean outboundRequestEnabled;
+
     private StringBuilder inboundRequest;
 
     private StringBuilder inboundRequestResponseBody;
@@ -57,17 +59,17 @@ public class ThreadLogContext implements Serializable {
         }
 
         ErrorDetails ex = new ErrorDetails();
-        if (e instanceof CompletionException){
+        if (e instanceof CompletionException) {
             e = e.getCause();
         }
 
-        if (e instanceof SubThreadException subThreadException){
+        if (e instanceof SubThreadException subThreadException) {
             String mdcRequestId = (String) subThreadException.getMessages().get("mdcRequestId");
             ex.setFromSubThread(true);
             ex.setErrorRequestId(mdcRequestId);
             logKeyMap.put(AidConstants.ERROR_REQUEST_ID, mdcRequestId);
             Object outboundRequest = subThreadException.getMessages().get("OutboundRequest");
-            if (outboundRequest!=null){
+            if (outboundRequest != null) {
                 this.outboundRequest = (StringBuilder) outboundRequest;
             }
             e = e.getCause();
@@ -127,7 +129,7 @@ public class ThreadLogContext implements Serializable {
             }
         }
         if (errorDetails != null) {
-            if (errorDetails.isFromSubThread()){
+            if (errorDetails.isFromSubThread()) {
                 sb.append("Note: You have an exception from a child thread. You can use this requestId to find all logs of this thread:").append(errorDetails.getErrorRequestId()).append(System.lineSeparator()).append(System.lineSeparator());
             }
             sb.append("Request failed, due to:").append(errorDetails.getErrorMessage()).append(System.lineSeparator());

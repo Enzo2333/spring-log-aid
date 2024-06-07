@@ -17,13 +17,11 @@ import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.reactive.function.BodyExtractors;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeFunction;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import zone.huawei.tools.springlogaid.constants.AidConstants;
 import zone.huawei.tools.springlogaid.context.LTH;
@@ -32,6 +30,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Consumer;
+
+import static zone.huawei.tools.springlogaid.constants.AidConstants.ENABLE_TRACKING_REQUEST;
 
 
 public class WebClientExchangeFilter implements ExchangeFilterFunction {
@@ -85,8 +85,8 @@ public class WebClientExchangeFilter implements ExchangeFilterFunction {
                 })
                 .body((ClientHttpRequest outputMessage, BodyInserter.Context context) -> request.body().insert(new BufferingDecorator(outputMessage, this::traceRequest, requestInfoHolder), context)).build();
         stopWatch.start();
-        Mono<ClientResponse> clientResponseMono = next.exchange(clientRequest).flatMap(clientResponse -> clientResponse.bodyToMono(String.class).flatMap(responseBody ->{
-            traceResponse(clientResponse, requestInfoHolder,responseBody);
+        Mono<ClientResponse> clientResponseMono = next.exchange(clientRequest).flatMap(clientResponse -> clientResponse.bodyToMono(String.class).flatMap(responseBody -> {
+            traceResponse(clientResponse, requestInfoHolder, responseBody);
             return Mono.just(clientResponse.mutate().body(responseBody).build());
         })).doFinally((signalType) -> {
             stopWatch.stop();
@@ -227,6 +227,9 @@ public class WebClientExchangeFilter implements ExchangeFilterFunction {
         }
 
         public Builder usePrivateMode() {
+            if (!ENABLE_TRACKING_REQUEST) {
+                throw new UnsupportedOperationException("LOG AID :: You can not use Private Mode in WebClientExchangeFilter.class, Because Request Mode is not enable, Please consider set the scope = OperatingMode.Request in @EnableOutboundRequestConfig or @EnableLogAid annotation in your Configuration class to enable it!");
+            }
             this.requestMode = true;
             return this;
         }
@@ -242,7 +245,7 @@ public class WebClientExchangeFilter implements ExchangeFilterFunction {
                 this.isPrintRequestBody = AidConstants.OutboundRequest.PRINT_REQUEST_BODY;
                 this.isPrintResponseBody = AidConstants.OutboundRequest.PRINT_RESPONSE_BODY;
             } else {
-                throw new UnsupportedOperationException("LOG AID :: You can not use Properties Config in WebClientExchangeFilter.class, Because Log Aid Config is not enable, Please consider adding the @EnableAidConfig annotation in your Configuration class to enable it!");
+                throw new UnsupportedOperationException("LOG AID :: You can not use Properties Config in WebClientExchangeFilter.class, Because Outbound Request Config is not enable, Please consider add the @EnableOutboundRequestConfig annotation in your Configuration class to enable it!");
             }
             return this;
         }

@@ -33,6 +33,7 @@ public class LogAidFilter implements Filter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
 
+        LTH.clear();
         if (MDC.get(AidConstants.MDC_REQUEST_ID_KEY) == null) {
             MDC.put(AidConstants.MDC_REQUEST_ID_KEY, UUID.randomUUID().toString());
         }
@@ -42,16 +43,16 @@ public class LogAidFilter implements Filter {
                 MDC.put(AidConstants.INBOUND_REQUEST_ID_HEADER_KEY, traceHeader);
                 LTH.addLogKey(AidConstants.INBOUND_REQUEST_ID_HEADER_KEY, traceHeader);
             }
+            boolean activatedRequest = isActivatedRequest(httpServletRequest);
             boolean printRequest = !isExcludeRequest(httpServletRequest);
-            boolean enabled = printRequest && ENABLE_FILTER_GLOBAL;
-            if (AidConstants.isGlobalMode() || isActivatedRequest(httpServletRequest)) {
+            boolean enabled = printRequest && (ENABLE_INBOUND_REQUEST_GLOBAL || activatedRequest);
+            if (AidConstants.isGlobalMode() || (ENABLE && activatedRequest)) {
                 LTH.clear();
                 LTH.enable();
-                if (printRequest)
-                    enabled = true;
             }
-            if (enabled) {
-                LTH.enableInboundRequest();
+            if (enabled || LTH.isEnabled()) {
+                if (enabled)
+                    LTH.enableInboundRequest();
                 HttpServletRequest requestWrapper = httpServletRequest;
                 StopWatch stopWatch = new StopWatch();
                 stopWatch.start();
@@ -71,20 +72,24 @@ public class LogAidFilter implements Filter {
         }
     }
 
-    private boolean isExcludeRequest(HttpServletRequest request){
+    private boolean isExcludeRequest(HttpServletRequest request) {
         String requestURI = request.getRequestURI();
         for (Pattern uriPattern : FILTER_EXCLUDE_URI_PATTERNS) {
-            if (uriPattern.matcher(requestURI).matches()){
+            if (uriPattern.matcher(requestURI).matches()) {
                 return true;
             }
         }
         return false;
     }
 
-    private boolean isActivatedRequest(HttpServletRequest request){
+    private boolean isActivatedRequest(HttpServletRequest request) {
+        if (!ENABLE_TRACKING_REQUEST) {
+            return true;
+        }
         ServletRequestPathUtils.parseAndCache(request);
         for (RequestMappingInfo requestMappingInfo : ACTIVATED_REQUEST_MAPPING) {
-            if (requestMappingInfo.getMatchingCondition(request)!=null){
+            if (requestMappingInfo.getMatchingCondition(request) != null) {
+                LTH.enableOutboundRequest();
                 return true;
             }
         }
@@ -108,8 +113,9 @@ public class LogAidFilter implements Filter {
         }
         sb.append(toCurl(request, requestBody));
         sb.append("===========INBOUND REQUEST END============").append(System.lineSeparator());
-        logger.info(sb.toString());
         LTH.setInboundRequest(sb);
+        if (LTH.isInboundRequestEnabled())
+            logger.info(sb.toString());
     }
 
     private StringBuilder toCurl(HttpServletRequest request, String requestBody) {

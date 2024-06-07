@@ -11,7 +11,7 @@ import java.lang.annotation.Annotation;
 
 public abstract class ConfigImportSelector<A extends Annotation> implements ImportSelector {
 
-    public ConfigImportSelector(){
+    public ConfigImportSelector() {
     }
 
     public final String[] selectImports(AnnotationMetadata metadata) {

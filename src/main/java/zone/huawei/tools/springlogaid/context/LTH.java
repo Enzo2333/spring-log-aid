@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static zone.huawei.tools.springlogaid.constants.AidConstants.ENABLE_FILTER_GLOBAL;
+import static zone.huawei.tools.springlogaid.constants.AidConstants.ENABLE_INBOUND_REQUEST_GLOBAL;
 import static zone.huawei.tools.springlogaid.constants.AidConstants.LogLevel.*;
 
 public class LTH {
@@ -34,20 +34,28 @@ public class LTH {
         getThreadLogContext().setRequestEnabled(true);
     }
 
-    public static void enableInboundRequest(){
+    public static void enableInboundRequest() {
         getThreadLogContext().setInboundRequestEnabled(true);
     }
 
-    public static boolean isInboundRequestEnabled(){
+    public static boolean isInboundRequestEnabled() {
         return getThreadLogContext().isInboundRequestEnabled();
+    }
+
+    public static void enableOutboundRequest() {
+        getThreadLogContext().setOutboundRequestEnabled(true);
+    }
+
+    public static boolean isOutboundRequestEnabled() {
+        return getThreadLogContext().isOutboundRequestEnabled();
     }
 
     public static boolean error() {
         return getThreadLogContext().getErrorDetails() != null;
     }
 
-    public static void setStopWatch(StopWatch stopWatch){
-        if (!isEnabled()){
+    public static void setStopWatch(StopWatch stopWatch) {
+        if (!isEnabled()) {
             return;
         }
         getThreadLogContext().setInboundRequestStopWatch(stopWatch);
@@ -204,8 +212,8 @@ public class LTH {
         }
         getThreadLogContext().getInboundRequest().append(response).append(System.lineSeparator());
         StopWatch stopWatch = getThreadLogContext().getInboundRequestStopWatch();
-        if (stopWatch!=null) {
-             stopWatch.stop();
+        if (stopWatch != null) {
+            stopWatch.stop();
             getThreadLogContext().getInboundRequest().insert(0, new StringBuilder().append(System.lineSeparator()).append("Request takes time: ").append(stopWatch.getTotalTimeSeconds()).append(" S").append(System.lineSeparator()));
         }
     }
@@ -231,15 +239,15 @@ public class LTH {
         return getThreadLogContext().getOutboundRequest();
     }
 
-    public static String getThreadLogReport() {//ThreadLogReport
+    public static String getThreadLogReport() {
         if (!AidConstants.ENABLE) {
             return "LOG AID :: No Log Tracker error message, Log Tracker not enabled.";
         }
         return getThreadLogContext().generateReport();
     }
 
-    public static void setInboundRequestResponseBody(StringBuilder responseBody){
-        if (!ENABLE_FILTER_GLOBAL&&!isEnabled()) {
+    public static void setInboundRequestResponseBody(StringBuilder responseBody) {
+        if (!ENABLE_INBOUND_REQUEST_GLOBAL && !isEnabled()) {
             return;
         }
         getThreadLogContext().setInboundRequestResponseBody(responseBody);
@@ -255,7 +263,7 @@ public class LTH {
                     .append(System.lineSeparator());
         }
         if (AidConstants.InboundRequest.PRINT_RESPONSE_BODY) {
-            if (getThreadLogContext().getInboundRequestResponseBody()!=null) {
+            if (getThreadLogContext().getInboundRequestResponseBody() != null) {
                 sb.append("Body  : ").append(getThreadLogContext().getInboundRequestResponseBody()).append(System.lineSeparator());
             }
         }
@@ -285,7 +293,7 @@ public class LTH {
             logger.info(getThreadLogReport());
         }
     }
-    
+
     public static void logInfoAndClear() {
         logInfo();
         clear();
