@@ -95,8 +95,8 @@ public class WebClientExchangeFilter implements ExchangeFilterFunction {
         })).doFinally((signalType) -> {
             stopWatch.stop();
             requestInfoHolder.insert(0, new StringBuilder(System.lineSeparator()).append("Request takes time: ").append(stopWatch.getTotalTimeSeconds()).append(" S").append(System.lineSeparator()));
-            boolean changedThread = !mainThread.equals(Thread.currentThread());
             if (outboundRequestEnabled){
+                boolean changedThread = !mainThread.equals(Thread.currentThread());
                 if (changedThread){
                     MDC.setContextMap(copyOfContextMap);
                     logger.info(requestInfoHolder.toString());
