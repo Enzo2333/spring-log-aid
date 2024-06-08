@@ -66,6 +66,10 @@ public class WebClientExchangeFilter implements ExchangeFilterFunction {
         if (!isEnabled()) {
             return next.exchange(request);
         }
+        boolean outboundRequestEnabled = LTH.isOutboundRequestEnabled();
+        Thread mainThread = Thread.currentThread();
+        Map<String, String> copyOfContextMap = MDC.getCopyOfContextMap();
+
         StopWatch stopWatch = new StopWatch();
         StringBuilder requestInfoHolder = new StringBuilder();
         requestInfoHolder.append("LogRequestId:").append(MDC.get(AidConstants.MDC_REQUEST_ID_KEY)).append(System.lineSeparator());
@@ -91,7 +95,16 @@ public class WebClientExchangeFilter implements ExchangeFilterFunction {
         })).doFinally((signalType) -> {
             stopWatch.stop();
             requestInfoHolder.insert(0, new StringBuilder(System.lineSeparator()).append("Request takes time: ").append(stopWatch.getTotalTimeSeconds()).append(" S").append(System.lineSeparator()));
-            logger.info(requestInfoHolder.toString());
+            boolean changedThread = !mainThread.equals(Thread.currentThread());
+            if (outboundRequestEnabled){
+                if (changedThread){
+                    MDC.setContextMap(copyOfContextMap);
+                    logger.info(requestInfoHolder.toString());
+                    MDC.clear();
+                }else {
+                    logger.info(requestInfoHolder.toString());
+                }
+            }
         });
         LTH.setOutboundRequestInfo(requestInfoHolder);
         return clientResponseMono;
@@ -99,7 +112,7 @@ public class WebClientExchangeFilter implements ExchangeFilterFunction {
 
     private boolean isEnabled() {
         if (this.requestMode) {
-            return LTH.isEnabled();
+            return LTH.isEnabled() || LTH.isOutboundRequestEnabled();
         } else {
             return true;
         }

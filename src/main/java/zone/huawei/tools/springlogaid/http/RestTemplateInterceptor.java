@@ -90,14 +90,15 @@ public class RestTemplateInterceptor implements ClientHttpRequestInterceptor {
             traceResponse(response, request, requestInfo);
         } catch (IOException e) {
             requestInfo.append("Failed to tracing response in log aid,due to :").append(e).append(System.lineSeparator());
-            logger.info(requestInfo.toString());
+            if (LTH.isOutboundRequestEnabled())
+                logger.info(requestInfo.toString());
         }
         return response;
     }
 
     private boolean isEnabled() {
         if (this.requestMode) {
-            return LTH.isOutboundRequestEnabled();
+            return LTH.isEnabled() || LTH.isOutboundRequestEnabled();
         } else {
             return true;
         }
