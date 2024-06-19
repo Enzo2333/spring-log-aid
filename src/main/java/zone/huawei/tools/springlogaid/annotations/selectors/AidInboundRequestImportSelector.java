@@ -6,6 +6,7 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.lang.Nullable;
 import zone.huawei.tools.springlogaid.annotations.EnableLogInboundRequest;
 import zone.huawei.tools.springlogaid.enums.AidBoolean;
 import zone.huawei.tools.springlogaid.enums.OperatingMode;
@@ -47,6 +48,6 @@ public class AidInboundRequestImportSelector extends ConfigImportSelector<Enable
     }
 
     @Override
-    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+    public void postProcessBeanFactory(@Nullable ConfigurableListableBeanFactory beanFactory) throws BeansException {
     }
 }

@@ -5,6 +5,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 import zone.huawei.tools.springlogaid.context.LTH;
@@ -23,7 +25,7 @@ public class AidExceptionResolver implements HandlerExceptionResolver {
     }
 
     @Override
-    public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+    public ModelAndView resolveException(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @Nullable Object handler, @NonNull Exception ex) {
         if (LTH.isEnabled()) {
             LTH.initException(ex);
         }

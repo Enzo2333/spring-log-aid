@@ -2,12 +2,16 @@ package zone.huawei.tools.springlogaid.filters;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.Part;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpMethod;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
@@ -15,12 +19,11 @@ import org.springframework.web.util.ServletRequestPathUtils;
 import zone.huawei.tools.springlogaid.constants.AidConstants;
 import zone.huawei.tools.springlogaid.context.LTH;
 import zone.huawei.tools.springlogaid.model.requests.CachedHttpServletRequest;
+import zone.huawei.tools.springlogaid.service.RequestFileService;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Enumeration;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static zone.huawei.tools.springlogaid.constants.AidConstants.*;
@@ -29,6 +32,9 @@ import static zone.huawei.tools.springlogaid.constants.AidConstants.*;
 public class LogAidFilter implements Filter {
 
     private final Logger logger = LoggerFactory.getLogger(LogAidFilter.class);
+
+    @Autowired(required = false)
+    private RequestFileService requestFileService;
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
@@ -96,29 +102,17 @@ public class LogAidFilter implements Filter {
         return false;
     }
 
-    private void traceRequest(HttpServletRequest request) throws IOException {
+    private void traceRequest(HttpServletRequest request) throws IOException, ServletException {
         StringBuilder sb = new StringBuilder();
         sb.append(System.lineSeparator()).append("===========INBOUND REQUEST START============").append(System.lineSeparator());
-        String requestBody = Optional.of(request.getInputStream()).map((inputStream) -> {
-            try {
-                return new String(IOUtils.toByteArray(inputStream), StandardCharsets.UTF_8);
-            } catch (IOException e) {
-                e.printStackTrace();
-                logger.info("LOG AID :: An exception occurred while reading the request body, due to: {}", e.toString());
-                return "LOG AID :: An exception occurred while reading the request body";
-            }
-        }).orElse(null);
-        if (!AidConstants.InboundRequest.PRINT_REQUEST_BODY && StringUtils.hasText(requestBody)) {
-            requestBody = "LOG AID :: Print requestBody flag is disabled!";
-        }
-        sb.append(toCurl(request, requestBody));
+        sb.append(toCurl(request));
         sb.append("===========INBOUND REQUEST END============").append(System.lineSeparator());
         LTH.setInboundRequest(sb);
         if (LTH.isInboundRequestEnabled())
             logger.info(sb.toString());
     }
 
-    private StringBuilder toCurl(HttpServletRequest request, String requestBody) {
+    private StringBuilder toCurl(HttpServletRequest request) throws ServletException, IOException {
         StringBuilder curl = new StringBuilder();
         curl.append("curl --location --request ");
         String method = request.getMethod();
@@ -132,13 +126,70 @@ public class LogAidFilter implements Filter {
                 curl.append("--header '").append(headerName).append(": ").append(header).append("' \\").append(System.lineSeparator());
             }
         }
-        if (HttpMethod.POST.name().equals(method) || HttpMethod.PUT.name().equals(method)) {
-            if (StringUtils.hasText(requestBody)) {
-                curl.append("--data-raw '").append(requestBody).append("'");
+        if (request instanceof CachedHttpServletRequest cachedHttpServletRequest){
+            if (cachedHttpServletRequest.isMultipart()){
+                recordMultipartRequest(curl,cachedHttpServletRequest);
+            }else {
+                if (HttpMethod.POST.name().equals(method) || HttpMethod.PUT.name().equals(method)) {
+                    String requestBody = getRequestBody(cachedHttpServletRequest);
+                    if (StringUtils.hasText(requestBody)) {
+                        curl.append("--data-raw '").append(requestBody).append("'");
+                    }
+                }
             }
         }
         curl.append(System.lineSeparator());
         return curl;
+    }
+
+    private void recordMultipartRequest(StringBuilder curl, CachedHttpServletRequest request) throws ServletException, IOException {
+        Collection<Part> parts = request.getParts();
+        Iterator<Part> iterator = parts.iterator();
+        while (iterator.hasNext()){
+            Part part = iterator.next();
+            String headerValue = part.getHeader("Content-Disposition");
+            ContentDisposition disposition = ContentDisposition.parse(headerValue);
+            String name = disposition.getName();
+            String filename = disposition.getFilename();
+            if (filename!=null){
+                if (requestFileService!=null){
+                    MockMultipartFile multipartFile = new MockMultipartFile(filename, filename, part.getContentType(), part.getInputStream());
+                    String record = requestFileService.handleRequestFileAndRecord(request, multipartFile);
+                    if (record!=null){
+                        record = record.replaceAll("\\\\","\\\\\\\\");
+                    }
+                    curl.append("--form '").append(name).append("=@\"/").append(record).append("\"'");
+                } else {
+                    curl.append("--form '").append(name).append("=@\"/").append("filePath/").append(filename).append("\"'");
+                }
+            }else {
+                curl.append("--form '").append(name).append("=\"").append(request.getParameter(name).replaceAll("\\\\","\\\\\\\\").replaceAll("\"","\\\\\"")).append("\"'");
+                String type = part.getContentType();
+                if (StringUtils.hasText(type)){
+                    curl.append(";type=").append(type);
+                }
+                curl.append("'");
+            }
+            if (iterator.hasNext()){
+                curl.append(" \\").append(System.lineSeparator());
+            }
+        }
+    }
+
+    private String getRequestBody(CachedHttpServletRequest request){
+        if (!AidConstants.InboundRequest.PRINT_REQUEST_BODY && request.getCachedBody().length > 0) {
+            return "LOG AID :: Print requestBody flag is disabled!";
+        }
+
+        return Optional.of(request.getInputStream()).map((inputStream) -> {
+            try {
+                return new String(IOUtils.toByteArray(inputStream), StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                e.printStackTrace();
+                logger.info("LOG AID :: An exception occurred while reading the request body, due to: {}", e.toString());
+                return "LOG AID :: An exception occurred while reading the request body";
+            }
+        }).orElse(null);
     }
 
 }

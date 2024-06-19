@@ -11,6 +11,7 @@ import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.lang.NonNull;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
@@ -63,7 +64,8 @@ public class RestTemplateInterceptor implements ClientHttpRequestInterceptor {
     }
 
     @Override
-    public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
+    @NonNull
+    public ClientHttpResponse intercept(@NonNull HttpRequest request,@NonNull  byte[] body, @NonNull ClientHttpRequestExecution execution) throws IOException {
         if (!isEnabled()) {
             return execution.execute(request, body);
         }

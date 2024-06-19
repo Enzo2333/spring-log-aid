@@ -6,6 +6,7 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.lang.NonNull;
 import zone.huawei.tools.springlogaid.annotations.EnableOutboundRequestConfig;
 import zone.huawei.tools.springlogaid.enums.AidBoolean;
 import zone.huawei.tools.springlogaid.enums.OperatingMode;
@@ -50,6 +51,6 @@ public class OutboundRequestImportSelector extends ConfigImportSelector<EnableOu
     }
 
     @Override
-    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+    public void postProcessBeanFactory(@NonNull ConfigurableListableBeanFactory beanFactory) throws BeansException {
     }
 }

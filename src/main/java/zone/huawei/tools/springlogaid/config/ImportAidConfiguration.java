@@ -8,6 +8,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProce
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.lang.NonNull;
 import zone.huawei.tools.springlogaid.annotations.registrars.AidBaseBeanRegistrar;
 import zone.huawei.tools.springlogaid.constants.AidConstants;
 import zone.huawei.tools.springlogaid.processors.RequestMappingInfoCollector;
@@ -33,6 +34,6 @@ public class ImportAidConfiguration implements BeanDefinitionRegistryPostProcess
     }
 
     @Override
-    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+    public void postProcessBeanFactory(@NonNull ConfigurableListableBeanFactory beanFactory) throws BeansException {
     }
 }

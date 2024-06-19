@@ -4,7 +4,7 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.lang.NonNullApi;
+import org.springframework.lang.NonNull;
 import zone.huawei.tools.springlogaid.config.BeanDependencyConfigurer;
 import zone.huawei.tools.springlogaid.config.JacksonConfig;
 import zone.huawei.tools.springlogaid.config.LogAidConfigProps;
@@ -30,7 +30,7 @@ public class AidBaseBeanRegistrar implements ImportBeanDefinitionRegistrar {
 
 
     @Override
-    public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
+    public void registerBeanDefinitions(@NonNull AnnotationMetadata importingClassMetadata,@NonNull BeanDefinitionRegistry registry) {
         beanClasses.forEach(aClass -> {
             if (registry.containsBeanDefinition(aClass.getName())) {
                 return;

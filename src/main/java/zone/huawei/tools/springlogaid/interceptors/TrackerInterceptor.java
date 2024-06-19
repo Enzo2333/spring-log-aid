@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.HandlerInterceptor;
 import zone.huawei.tools.springlogaid.context.LTH;
 import zone.huawei.tools.springlogaid.model.responses.CachedHttpServletResponse;
@@ -17,14 +18,14 @@ public class TrackerInterceptor implements HandlerInterceptor {
     private final Logger logger = LoggerFactory.getLogger(TrackerInterceptor.class);
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) {
         CachedHttpServletResponse responseWrapper = new CachedHttpServletResponse(response);
         request.setAttribute("responseWrapper", responseWrapper);
         return true;
     }
 
     @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+    public void afterCompletion(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler, Exception ex) {
         if (ex != null) {
             return;
         }

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.lang.Nullable;
 import zone.huawei.tools.springlogaid.annotations.EnableLogAid;
 import zone.huawei.tools.springlogaid.constants.AidConstants;
 import zone.huawei.tools.springlogaid.enums.OperatingMode;
@@ -58,6 +59,6 @@ public class AidImportSelector extends ConfigImportSelector<EnableLogAid> implem
     }
 
     @Override
-    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+    public void postProcessBeanFactory(@Nullable ConfigurableListableBeanFactory beanFactory) throws BeansException {
     }
 }

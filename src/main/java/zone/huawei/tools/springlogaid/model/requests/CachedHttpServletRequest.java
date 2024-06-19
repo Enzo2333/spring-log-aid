@@ -5,7 +5,9 @@ import jakarta.servlet.ReadListener;
 import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
+import lombok.Getter;
 import org.springframework.util.StreamUtils;
+import org.springframework.util.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -14,22 +16,43 @@ import java.io.InputStreamReader;
 
 public class CachedHttpServletRequest extends HttpServletRequestWrapper {
 
-    private final byte[] cachedBody;
+    @Getter
+    private byte[] cachedBody;
+
+    private ServletInputStream inputStream;
+
+    @Getter
+    private final boolean isMultipart;
 
     public CachedHttpServletRequest(HttpServletRequest request) throws IOException {
         super(request);
-        ServletInputStream inputStream = request.getInputStream();
-        this.cachedBody = StreamUtils.copyToByteArray(inputStream);
+        this.isMultipart = StringUtils.startsWithIgnoreCase(request.getContentType(), "multipart/");
+        if (this.isMultipart) {
+            request.getParameterMap();
+        } else {
+            ServletInputStream inputStream = request.getInputStream();
+            this.cachedBody = StreamUtils.copyToByteArray(inputStream);
+        }
     }
 
     @Override
     public ServletInputStream getInputStream() {
+        if (cachedBody == null) {
+            return inputStream;
+        }
         return new CachedServletInputStream();
     }
 
     @Override
     public BufferedReader getReader() {
-        return new BufferedReader(new InputStreamReader(new CachedServletInputStream()));
+        return new BufferedReader(new InputStreamReader(getInputStream()));
+    }
+
+    public void reset() {
+        if (!this.isMultipart) {
+            this.inputStream = new CachedServletInputStream();
+            this.cachedBody = null;
+        }
     }
 
     private class CachedServletInputStream extends ServletInputStream {
